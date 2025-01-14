@@ -1,0 +1,22 @@
+{
+  "name": "langchain-llm-example",
+  "version": "1.0.0",
+  "description": "A simple example of using Langchain with TypeScript to call an LLM and stream output.",
+  "main": "main.ts",
+  "scripts": {
+    "start": "ts-node main.ts"
+  },
+  "dependencies": {
+    "@langchain/openai": "^0.3.17",
+    "dotenv": "^16.4.7",
+    "langchain": "^0.3.0",
+    "openai": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^4.0.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}

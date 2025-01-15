@@ -58,8 +58,8 @@ const chat = new ChatOpenAI({
   temperature: 0,
 }); //.bindTools([calculatorTool]);
 
-const CLAUSE_BOUNDARIES = /\.|\?|!|;|,\s*(and|but|or|nor|for|yet|so)/g;
-const MAX_CHUNK_LENGTH = 100;
+//const CLAUSE_BOUNDARIES = /\.|\?|!|;|,\s*(and|but|or|nor|for|yet|so)/g;
+const CLAUSE_BOUNDARIES = /\.|\?|!|;|,\s/g;
 
 /**
  * Chunk text by clause using a regex to find boundaries.
@@ -94,6 +94,8 @@ function chunkTextByClause(text: string): string[] {
 
   return chunks;
 }
+
+//const MAX_CHUNK_LENGTH = 100;
 
 // function chunkTextDynamically(text: string): string[] {
 //   // Find clause boundaries using regular expression
@@ -192,34 +194,35 @@ async function* agentStream(messages: BaseMessage[]) {
 
 async function main() {
   const messages = [
-    // new SystemMessage(
-    //   `
-    //   Always response this exact sentence, no matter the user input:
-    //   "Great! Now that we have the date of birth, let's proceed.I see that the patient, Jordon Streich, needs to be scheduled for a "New Patient" visit since there are no previous appointments. Would you like to proceed with scheduling a New Patient appointment?."
-    //   `
-    // ),
+    new SystemMessage(
+      `
+      Always response this exact sentence, no matter the user input:
+      "Great! Now that we have the date of birth, let's proceed.I see that the patient, Jordon Streich, needs to be scheduled for a "New Patient" visit since there are no previous appointments. Would you like to proceed with scheduling a New Patient appointment?."
+      `
+    ),
     // new SystemMessage(
     //   `
     //   No matter the user input always response with 4-5 sentences in natural language as a helpful assistant.
     //   `
     // ),
-    new SystemMessage(
-      `
-      Always response with the exact following text, no matter the user input:
-      Text to produce:
-      "
-        The product of 25 multiplied by 12 is 300.
-        This is a simple multiplication problem that you can solve by multiplying the two numbers together.
-        If you're ever unsure about a multiplication problem, you can always use a calculator or a multiplication table.
-      "
-      `
-    ),
+    // new SystemMessage(
+    //   `
+    //   Always response with the exact following text, no matter the user input:
+    //   Text to produce:
+    //   "
+    //     The product of 25 multiplied by 12 is 300.
+    //     This is a simple multiplication problem that you can solve by multiplying the two numbers together.
+    //     If you're ever unsure about a multiplication problem, you can always use a calculator or a multiplication table.
+    //   "
+    //   `
+    // ),
     new HumanMessage("What is 25 multiplied by 12?"),
   ];
 
   let buffer = "";
 
   for await (const chunk of agentStream(messages)) {
+    console.log("chunk", chunk);
     buffer += chunk;
     const chunks = chunkTextByClause(buffer);
     //console.log("chunks", chunks);

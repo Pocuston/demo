@@ -59,7 +59,7 @@ const chat = new ChatOpenAI({
 }); //.bindTools([calculatorTool]);
 
 //const CLAUSE_BOUNDARIES = /\.|\?|!|;|,\s*(and|but|or|nor|for|yet|so)/g;
-const CLAUSE_BOUNDARIES = /\.|\?|!|;|,| (and|but|or|nor|for|yet|so|that) /g;
+const CLAUSE_BOUNDARIES = /\.|\?|!|;|,| (and|but|or|nor|for|yet|so) /g;
 
 /**
  * Chunk text by clause using a regex to find boundaries.
@@ -194,28 +194,28 @@ async function* agentStream(messages: BaseMessage[]) {
 
 async function main() {
   const messages = [
-    // new SystemMessage(
-    //   `
-    //   Always response this exact sentence, no matter the user input:
-    //   "Great! Now that we have the date of birth, let's proceed.I see that the patient, Jordon Streich, needs to be scheduled for a "New Patient" visit since there are no previous appointments. Would you like to proceed with scheduling a New Patient appointment?."
-    //   `
-    // ),
+    new SystemMessage(
+      `
+      Always response this exact sentence, no matter the user input:
+      "Great! Now that we have the date of birth, let's proceed.I see that the patient, Jordon Streich, needs to be scheduled for a "New Patient" visit since there are no previous appointments. Would you like to proceed with scheduling a New Patient appointment?."
+      `
+    ),
     // new SystemMessage(
     //   `
     //   No matter the user input always response with 4-5 sentences in natural language as a helpful assistant.
     //   `
     // ),
-    new SystemMessage(
-      `
-      Always response with the exact following text, no matter the user input:
-      Text to produce:
-      "
-        The product of 25 multiplied by 12 is 300.
-        This is a simple multiplication problem that you can solve by multiplying the two numbers together.
-        If you're ever unsure about a multiplication problem, you can always use a calculator or a multiplication table.
-      "
-      `
-    ),
+    // new SystemMessage(
+    //   `
+    //   Always response with the exact following text, no matter the user input:
+    //   Text to produce:
+    //   "
+    //     The product of 25 multiplied by 12 is 300.
+    //     This is a simple multiplication problem that you can solve by multiplying the two numbers together.
+    //     If you're ever unsure about a multiplication problem, you can always use a calculator or a multiplication table.
+    //   "
+    //   `
+    // ),
     new HumanMessage("What is 25 multiplied by 12?"),
   ];
 

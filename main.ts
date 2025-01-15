@@ -61,56 +61,90 @@ const chat = new ChatOpenAI({
 const CLAUSE_BOUNDARIES = /\.|\?|!|;|,\s*(and|but|or|nor|for|yet|so)/g;
 const MAX_CHUNK_LENGTH = 100;
 
-function chunkTextDynamically(text: string): string[] {
+/**
+ * Chunk text by clause using a regex to find boundaries.
+ *
+ * @param text The text to split
+ * @returns string[] Array of text chunks
+ */
+function chunkTextByClause(text: string): string[] {
   // Find clause boundaries using regular expression
   const boundariesIndices: number[] = [];
-  let match;
+  let match: RegExpExecArray | null;
 
-  while ((match = CLAUSE_BOUNDARIES.exec(text)) !== null) {
+  const pattern = new RegExp(CLAUSE_BOUNDARIES);
+  while ((match = pattern.exec(text)) !== null) {
     boundariesIndices.push(match.index);
   }
 
   const chunks: string[] = [];
   let start = 0;
 
-  // Add chunks until the last clause boundary
+  // Add chunks up to each boundary index
   for (const boundaryIndex of boundariesIndices) {
-    let chunk = text.slice(start, boundaryIndex + 1).trim();
-    if (chunk.length <= MAX_CHUNK_LENGTH) {
-      chunks.push(chunk);
-    } else {
-      // Split by comma if it doesn't create subchunks less than three words
-      const subchunks = chunk.split(",");
-      let tempChunk = "";
-      for (const subchunk of subchunks) {
-        if (tempChunk.length + subchunk.length <= MAX_CHUNK_LENGTH) {
-          tempChunk += subchunk + ",";
-        } else {
-          if (tempChunk.split(" ").length >= 3) {
-            chunks.push(tempChunk.trim());
-          }
-          tempChunk = subchunk + ",";
-        }
-      }
-      if (tempChunk) {
-        if (tempChunk.split(" ").length >= 3) {
-          chunks.push(tempChunk.trim());
-        }
-      }
-    }
+    chunks.push(text.slice(start, boundaryIndex + 1).trim());
     start = boundaryIndex + 1;
   }
 
-  // Split remaining text into subchunks if needed
-  const remainingText = text.slice(start).trim();
-  if (remainingText) {
-    const remainingSubchunks =
-      remainingText.match(new RegExp(`.{1,${MAX_CHUNK_LENGTH}}`, "g")) || [];
-    chunks.push(...remainingSubchunks);
+  // Append remaining text after the last boundary
+  const remainder = text.slice(start).trim();
+  if (remainder) {
+    chunks.push(remainder);
   }
 
   return chunks;
 }
+
+// function chunkTextDynamically(text: string): string[] {
+//   // Find clause boundaries using regular expression
+//   const boundariesIndices: number[] = [];
+//   let match;
+
+//   while ((match = CLAUSE_BOUNDARIES.exec(text)) !== null) {
+//     boundariesIndices.push(match.index);
+//   }
+
+//   const chunks: string[] = [];
+//   let start = 0;
+
+//   // Add chunks until the last clause boundary
+//   for (const boundaryIndex of boundariesIndices) {
+//     let chunk = text.slice(start, boundaryIndex + 1).trim();
+//     if (chunk.length <= MAX_CHUNK_LENGTH) {
+//       chunks.push(chunk);
+//     } else {
+//       // Split by comma if it doesn't create subchunks less than three words
+//       const subchunks = chunk.split(",");
+//       let tempChunk = "";
+//       for (const subchunk of subchunks) {
+//         if (tempChunk.length + subchunk.length <= MAX_CHUNK_LENGTH) {
+//           tempChunk += subchunk + ",";
+//         } else {
+//           if (tempChunk.split(" ").length >= 3) {
+//             chunks.push(tempChunk.trim());
+//           }
+//           tempChunk = subchunk + ",";
+//         }
+//       }
+//       if (tempChunk) {
+//         if (tempChunk.split(" ").length >= 3) {
+//           chunks.push(tempChunk.trim());
+//         }
+//       }
+//     }
+//     start = boundaryIndex + 1;
+//   }
+
+//   // Split remaining text into subchunks if needed
+//   const remainingText = text.slice(start).trim();
+//   if (remainingText) {
+//     const remainingSubchunks =
+//       remainingText.match(new RegExp(`.{1,${MAX_CHUNK_LENGTH}}`, "g")) || [];
+//     chunks.push(...remainingSubchunks);
+//   }
+
+//   return chunks;
+// }
 
 async function* agentStream(messages: BaseMessage[]) {
   // Call the LLM with function calling
@@ -187,14 +221,18 @@ async function main() {
 
   for await (const chunk of agentStream(messages)) {
     buffer += chunk;
-    const chunks = chunkTextDynamically(buffer);
+    const chunks = chunkTextByClause(buffer);
+    //console.log("chunks", chunks);
     if (chunks.length > 1) {
-      //console.log("User-facing chunk:", chunks[0]);
+      //simulated sending to TTS
+      console.log("User-facing chunk:", chunks[0]);
       buffer = chunks[1];
     }
-
-    console.log("User-facing chunk:", chunk);
   }
+
+  //IMPORTANT: do not forget to send the last buffer left-over to TTS
+  //simulated sending to TTS
+  console.log("User-facing chunk:", buffer);
 }
 
 // Run the main function
